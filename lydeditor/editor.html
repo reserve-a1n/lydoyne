@@ -1,0 +1,295 @@
+<style>
+body 
+{ 
+   background-color: black; 
+   color: rgb(160, 160, 160); 
+}
+
+.header {
+   background-color: #333;
+   color: #333;
+   padding: 10px;
+   text-align: center;
+   border-radius: 900px;
+   position: fixed;
+   top: -22px;
+   right: 10px;
+   padding: 0px 0px;
+   
+   transition: top 0.3s ease, border-radius 0.3s ease, color 0.3s ease;
+}
+.header:hover {
+   top: 10px;
+   color: #c2c2c2;
+   border-radius: 800px;
+}
+.header button {
+   background-color: #333;
+   border: none;
+   padding: 10px 15px;
+   cursor: pointer;
+   border-radius: 900px;
+
+   color: inherit; 
+
+   transition: background-color 0.3s ease;
+}
+.header button:hover {
+   background-color: #575757;
+}
+
+#doc {
+   white-space: pre-wrap;
+   outline: none;
+}
+
+.bottomright {
+   bottom: 2px;
+   right: 30px;
+   position: fixed;
+   color: rgb(68, 68, 68);
+}
+
+.documentsmenu {
+   opacity: 0;
+   transform: scale(0.9);
+
+   background-color: #333;
+   color: #c2c2c2;
+   
+   padding: 10px;
+   text-align: center;
+   border-radius: 10px;
+   position: fixed;
+   top: 45px;
+   right: 10px;
+   padding: 0px 0px;
+
+   display: flex;
+   flex-direction: column;
+   gap: 10px;
+
+   align-items: stretch;
+
+   transition: opacity 0.3s ease, transform 0.01s ease;
+}
+.documentsmenu.isactive {
+   opacity: 1;
+   transform: scale(1);
+}
+.documentsmenu button {
+   background-color: #333;
+   border: none;
+   padding: 10px 10px;
+   cursor: pointer;
+   border-radius: 6px;
+
+   align-items: center;
+   justify-content: space-between;
+   
+   display: flex;
+   gap: 10px;
+
+   width: 100%;
+   box-sizing: border-box;
+   height: auto;
+
+   color: inherit; 
+
+   transition: background-color 0.3s ease;
+}
+.documentsmenu button:hover {
+   background-color: #575757;
+}
+</style>
+<head>
+   <title>Editor</title>
+   <link rel="icon" type="image/x-icon" href="https://www.svgrepo.com/download/195655/planet-space.svg">
+</head>
+<body>
+   <br>
+   <p contenteditable="true" id="doc">body</p>
+   
+   <div class="header">
+      <button id="darkmode-toggle" onclick="toggleDark()">Light Mode</button>
+      
+      <a>|</a>
+
+      <button onclick="save()">Export</button>
+      <button onclick="load()">Load</button>
+
+      <a>|</a>
+      
+      <button onclick="newdoc()">New</button>
+      <button onclick="savedoc()">Save</button>
+      
+      <a>|</a>
+      
+      <button id="sidemenutoggle">Documents</button>
+      
+   </div>
+
+   <div class="documentsmenu" id="documentmenu">
+      <template id="docMenuItemTemplate">
+         <button class="mainitembutton">
+            <!-- <span onclick="morebutton(event, 0)"><svg width="15px" height="15px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#c2c2c2"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M12 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM10 12a2 2 0 1 1 4 0 2 2 0 0 1-4 0ZM10 19a2 2 0 1 1 4 0 2 2 0 0 1-4 0Z" fill="#c2c2c2"></path></g></svg>
+            </span> -->
+         </button>
+      </template>
+
+      <template id="morebuttonsvg">
+         <div>
+         <span class="spann"><svg width="15px" height="15px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#c2c2c2"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M12 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM10 12a2 2 0 1 1 4 0 2 2 0 0 1-4 0ZM10 19a2 2 0 1 1 4 0 2 2 0 0 1-4 0Z" fill="#c2c2c2"></path></g></svg></span>
+         </div>
+      </template>
+
+
+   </div>
+
+   <p id="wordcount" class="bottomright">sdfgdf</p>
+
+   <script>
+      const openedDocumentIndex = 0;
+
+      class DocumentArray {
+         constructor() {
+            this.documents = [];
+         }
+
+         addDocument(name, text = "") {
+            this.documents.push({
+               index: this.documents.length,
+               name: name,
+               content: text
+            });
+         }
+
+         updateText(docInd, text = "") {
+            const doc = this.documents.find(d => d.index === docInd);
+            if(doc) {
+               doc.content = text;
+            }
+         }
+
+         updateName(docInd, text = "") {
+            const doc = this.documents.find(d => d.index === docInd);
+            if(doc) {
+               doc.name = text;
+            }
+         }
+
+         getDocument(docInd){
+            return this.documents.find(d => d.index === docInd);
+         }
+      }
+
+      const docArray = new DocumentArray();
+
+      function toggleDark() {
+         var body = document.body;
+         var button = document.getElementById("darkmode-toggle");
+         body.classList.toggle("light-mode");
+         if (body.classList.contains("light-mode")) {
+            button.textContent = "Dark Mode";
+            body.style.backgroundColor = "white";
+            body.style.color = "black";
+         } else {
+            button.textContent = "Light Mode";
+            body.style.backgroundColor = "black";
+            body.style.color = "rgb(160, 160, 160)";
+         }
+      }
+
+      function save() {
+         var doc = document.getElementById("doc").innerText;
+         var blob = new Blob([doc], { type: "text/plain;charset=utf-8" });
+         var download = document.createElement("a");
+         download.href = URL.createObjectURL(blob);
+         download.download = "document.txt";
+         download.click();
+         URL.revokeObjectURL(download.href);
+      }
+
+      function load() {
+         var fileUpload = document.createElement("input");
+         fileUpload.type = "file";
+         fileUpload.accept = ".txt";
+         fileUpload.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+               document.getElementById("doc").textContent = e.target.result;
+            }
+            reader.readAsText(file);
+         });
+         fileUpload.click();
+      }
+
+      const sidemenutoggle = document.getElementById("sidemenutoggle");
+      const documentmenu = document.getElementById("documentmenu");
+      const headh = document.querySelector(".header");
+      const docMenuItemTemplate = document.getElementById("docMenuItemTemplate");
+      const morebuttonsvg = document.getElementById("morebuttonsvg");
+      sidemenutoggle.addEventListener('click', (e) => {
+         e.stopPropagation();
+         documentmenu.classList.toggle("isactive");
+      });
+      documentmenu.addEventListener('click', (e) => {
+         e.stopPropagation();
+      });
+
+      window.addEventListener('mousemove', (event) => {
+         const hoveringHead = headh.contains(event.target);
+         const hoveringDocs = documentmenu.contains(event.target);
+
+         if(!hoveringHead && !hoveringDocs) {
+            documentmenu.classList.remove("isactive");
+         }
+      });
+
+      function morebutton(itemnum)
+      {
+         console.log(itemnum);
+      }
+
+      function newdoc()
+      {
+         docArray.addDocument("Untitled", "body");
+      }
+
+      function addMenuButton(index, text){
+         const docmenuitem = docMenuItemTemplate.content.cloneNode(true);
+         const docmenuitembtn = docmenuitem.querySelector(".mainitembutton");
+         docmenuitembtn.textContent = text;
+         
+         documentmenu.appendChild(docmenuitem);
+
+         const morebtn = morebuttonsvg.content.cloneNode(true);
+         morebtnspan = morebtn.querySelector(".spann");
+         docmenuitembtn.appendChild(morebtn);
+         morebtnspan.addEventListener('click', (e) => {
+            e.stopPropagation();
+            morebutton(index);
+         });
+         
+         docmenuitembtn.addEventListener('click', () => {
+            openDocument(index);
+         });
+      }
+
+      docArray.addDocument("sgdfg bee", "sdfgsdfjghskdjhfgiu");
+
+      for(i = 0; i < docArray.documents.length; i++) {
+         const mnuitm = docArray.getDocument(i);
+         addMenuButton(i, mnuitm.name);
+      }
+
+      const wordc = document.getElementById("wordcount");
+      const doc = document.getElementById("doc");
+      setInterval(() => {
+         const text = doc.innerText;
+         const txt = text.trim();
+         wordc.innerText = text.split(/\s+/).length + " words, " + text.length + " letters";
+      }, 50);
+   </script>
+</body>
