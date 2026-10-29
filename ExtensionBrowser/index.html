@@ -288,6 +288,7 @@
                     const ind = tabs.findIndex(item => item.id === id);
                     if(ind !== -1)
                     {
+                        tabs[ind].tabframe.remove();
                         tabs[ind].element.remove();
                         tabs.splice(ind,1);
                     }
